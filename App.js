@@ -1,22 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Home from './components/Home.js';
+import { View, Platform } from 'react-native';
+import { lightColors, createTheme, ThemeProvider } from '@rneui/themed';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+
+import NavTabs from './components/layout/NavTabs';
+
+const theme = createTheme({
+	lightColors: {
+		...Platform.select({
+			default: lightColors.platform.android,
+			ios: lightColors.platform.ios,
+		}),
+	},
+});
 
 export default function App() {
 	return (
-		<View style={styles.container}>
-			<Text>Testing text changes.</Text>
-			<Home />
-			<StatusBar style='auto' />
-		</View>
+		<NavigationContainer>
+			<SafeAreaProvider>
+				<ThemeProvider theme={theme}>
+					<NavTabs />
+				</ThemeProvider>
+			</SafeAreaProvider>
+		</NavigationContainer>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-});

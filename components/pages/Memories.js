@@ -1,12 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useContext } from 'react';
+import AuthContext from '../../context/authentication/authContext.js';
+
 import * as SecureStore from 'expo-secure-store';
 
 const getValueFor = async (key) => {
-	await SecureStore.getItemAsync(key);
+	return await SecureStore.getItemAsync(key);
 };
 
 const Memories = () => {
+	const authContext = useContext(AuthContext);
+	const { profile } = authContext;
+
 	useEffect(() => {
 		const data = async () => {
 			const token = await getValueFor('authToken');
@@ -18,7 +23,7 @@ const Memories = () => {
 
 	return (
 		<View style={styles.container}>
-			<Text>Welcome home!</Text>
+			<Text>Welcome home, {profile.username}!</Text>
 		</View>
 	);
 };

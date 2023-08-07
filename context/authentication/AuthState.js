@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import AuthContext from './authContext';
 import authReducer from './authReducer';
 import { FOREVER_BASE } from '@env';
-import { LOGIN } from '../types';
+import { LOGIN, CONFIRM_SESSION, LOGOUT, SET_LOADING } from '../types';
 
 const save = async (key, value) => {
 	await SecureStore.setItemAsync(key, value);
@@ -30,15 +30,16 @@ const AuthState = (props) => {
 
 		const req = await fetch(`${FOREVER_BASE}/v1/auth/login`, {
 			method: 'POST',
-			body: {
+			body: JSON.stringify({
 				username,
 				password,
-			},
+			}),
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		});
 		const res = await req.json();
+		console.log(res);
 
 		if (res.success) {
 			dispatch({
@@ -46,10 +47,40 @@ const AuthState = (props) => {
 				payload: res.data.user,
 			});
 
-			save('authKey', res.data.token);
+			await save('authToken', res.data.token);
 		} else {
 			// TODO handle with alert
 		}
+	};
+
+	const confirmSession = async (token) => {
+		setLoading();
+
+		const req = await fetch(`${FOREVER_BASE}/v1/auth/confirmsession`, {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		const res = await req.json();
+		console.log(res);
+
+		if (res.success) {
+			dispatch({
+				type: CONFIRM_SESSION,
+				payload: res.data.user,
+			});
+		} else {
+			dispatch({
+				type: LOGOUT,
+			});
+		}
+	};
+
+	// Set Loading State
+	const setLoading = () => {
+		dispatch({ type: SET_LOADING });
 	};
 
 	return (
@@ -59,6 +90,8 @@ const AuthState = (props) => {
 				profile: state.profile,
 				loading: state.loading,
 				login,
+				confirmSession,
+				setLoading,
 			}}>
 			{props.children}
 		</AuthContext.Provider>

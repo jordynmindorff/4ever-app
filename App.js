@@ -2,8 +2,10 @@ import { View, Platform } from 'react-native';
 import { lightColors, createTheme, ThemeProvider } from '@rneui/themed';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import AuthState from './context/authentication/AuthState.js';
+import MemoryState from './context/memory/MemoryState.js';
 
-import NavTabs from './components/layout/NavTabs';
+import AuthBoundary from './components/AuthBoundary.js';
 
 const theme = createTheme({
 	lightColors: {
@@ -16,12 +18,16 @@ const theme = createTheme({
 
 export default function App() {
 	return (
-		<NavigationContainer>
-			<SafeAreaProvider>
-				<ThemeProvider theme={theme}>
-					<NavTabs />
-				</ThemeProvider>
-			</SafeAreaProvider>
-		</NavigationContainer>
+		<AuthState>
+			<MemoryState>
+				<NavigationContainer>
+					<SafeAreaProvider>
+						<ThemeProvider theme={theme}>
+							<AuthBoundary />
+						</ThemeProvider>
+					</SafeAreaProvider>
+				</NavigationContainer>
+			</MemoryState>
+		</AuthState>
 	);
 }

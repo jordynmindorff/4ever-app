@@ -1,8 +1,6 @@
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import { Input, Icon, Button } from '@rneui/themed';
 import { useState, useContext } from 'react';
-import { FOREVER_BASE } from '@env';
-import * as SecureStore from 'expo-secure-store';
 import AuthContext from '../../context/authentication/authContext.js';
 
 const Login = () => {

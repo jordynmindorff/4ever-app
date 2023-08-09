@@ -15,18 +15,11 @@ const Memories = () => {
 	const { getMemories, memories } = memoryContext;
 
 	useEffect(() => {
-		const data = async () => {
-			const token = await getValueFor('authToken');
-
-			await getMemories(token);
-		};
-
-		data();
+		getMemories();
 	}, []);
 
 	return (
 		<View>
-			<Text>Welcome home, {profile.username}!</Text>
 			<MemoryList memories={memories} />
 		</View>
 	);

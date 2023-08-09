@@ -1,11 +1,11 @@
 import React, { useReducer } from 'react';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
-import { FOREVER_BASE, AUTH_TOKEN } from '@env';
+import { FOREVER_BASE } from '@env';
 import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING } from '../types';
 
 // TODO: DON'T HARDCODE AUTH, IMPLEMENT SEPARATELY NAVIGATED AUTH FLOW WITH TOKEN STORING
-const NHLState = (props) => {
+const MemoryState = (props) => {
 	const initialState = {
 		memories: [],
 		memory: {},
@@ -15,12 +15,12 @@ const NHLState = (props) => {
 	const [state, dispatch] = useReducer(memoryReducer, initialState);
 
 	// Get all memories associated with active account
-	const getMemories = async () => {
+	const getMemories = async (token) => {
 		setLoading();
 
 		const req = await fetch(`${FOREVER_BASE}/v1/memory`, {
 			headers: {
-				Authorization: AUTH_TOKEN,
+				Authorization: `Bearer ${token}`,
 			},
 		});
 		const res = await req.json();
@@ -68,4 +68,4 @@ const NHLState = (props) => {
 	);
 };
 
-export default NHLState;
+export default MemoryState;

@@ -9,10 +9,6 @@ const save = async (key, value) => {
 	await SecureStore.setItemAsync(key, value);
 };
 
-const getValueFor = async (key) => {
-	return await SecureStore.getItemAsync(key);
-};
-
 const AuthState = (props) => {
 	const initialState = {
 		isLoggedIn: false,
@@ -39,7 +35,6 @@ const AuthState = (props) => {
 			},
 		});
 		const res = await req.json();
-		console.log(res);
 
 		if (res.success) {
 			dispatch({
@@ -64,7 +59,6 @@ const AuthState = (props) => {
 		});
 
 		const res = await req.json();
-		console.log(res);
 
 		if (res.success) {
 			dispatch({
@@ -76,6 +70,12 @@ const AuthState = (props) => {
 				type: LOGOUT,
 			});
 		}
+	};
+
+	const logout = () => {
+		dispatch({
+			type: LOGOUT,
+		});
 	};
 
 	// Set Loading State
@@ -90,6 +90,7 @@ const AuthState = (props) => {
 				profile: state.profile,
 				loading: state.loading,
 				login,
+				logout,
 				confirmSession,
 				setLoading,
 			}}>

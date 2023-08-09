@@ -5,9 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import NavTabs from './layout/NavTabs';
 import Login from './pages/Login';
 
-const getValueFor = async (key) => {
-	return await SecureStore.getItemAsync(key);
-};
+const getValueFor = async (key) => await SecureStore.getItemAsync(key);
 
 const AuthBoundary = () => {
 	const authContext = useContext(AuthContext);
@@ -16,7 +14,6 @@ const AuthBoundary = () => {
 	useEffect(() => {
 		const check = async () => {
 			const value = await getValueFor('authToken');
-			console.log(value);
 
 			if (value) {
 				confirmSession(value);

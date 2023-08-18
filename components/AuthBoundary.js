@@ -3,7 +3,7 @@ import { useEffect, useContext, Fragment } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
 import NavTabs from './layout/NavTabs';
-import Login from './pages/Login';
+import AuthStack from './layout/AuthStack.js';
 
 const getValueFor = async (key) => await SecureStore.getItemAsync(key);
 
@@ -23,7 +23,7 @@ const AuthBoundary = () => {
 		check();
 	}, []);
 
-	return <Fragment>{isLoggedIn ? <NavTabs /> : <Login />}</Fragment>;
+	return <Fragment>{isLoggedIn ? <NavTabs /> : <AuthStack />}</Fragment>;
 };
 
 export default AuthBoundary;

@@ -3,7 +3,7 @@ import { Input, Icon, Button } from '@rneui/themed';
 import { useState, useContext } from 'react';
 import AuthContext from '../../context/authentication/authContext.js';
 
-const Login = () => {
+const Login = ({ navigation }) => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 
@@ -40,6 +40,12 @@ const Login = () => {
 			/>
 
 			<Button title='Login' onPress={handleLogin} />
+			<Button
+				style={styles.btn}
+				type='clear'
+				title='New to 4ever? Signup Instead'
+				onPress={() => navigation.navigate('Signup')}
+			/>
 		</View>
 	);
 };
@@ -49,6 +55,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	btn: {
+		marginTop: 10,
 	},
 });
 

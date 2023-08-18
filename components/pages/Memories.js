@@ -1,11 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { useEffect, useContext } from 'react';
+import { Button, Icon } from '@rneui/themed';
 import AuthContext from '../../context/authentication/authContext.js';
 import MemoryContext from '../../context/memory/memoryContext.js';
-import * as SecureStore from 'expo-secure-store';
 import MemoryList from '../memories/MemoryList.js';
-
-const getValueFor = async (key) => await SecureStore.getItemAsync(key);
 
 const Memories = () => {
 	const authContext = useContext(AuthContext);
@@ -18,9 +16,28 @@ const Memories = () => {
 		getMemories();
 	}, []);
 
+	const triggerNewMemory = () => {};
+
 	return (
 		<View>
 			<MemoryList memories={memories} />
+			<Button
+				containerStyle={{
+					flexDirection: 'row',
+					flexWrap: 'wrap',
+					justifyContent: 'center',
+					alignItems: 'center',
+					margin: 20,
+					height: 50,
+				}}
+				buttonStyle={{
+					flex: 1,
+					width: 50,
+					height: 100,
+				}}
+				onPress={triggerNewMemory}>
+				<Icon type='ionicons' name='add' color='white' />
+			</Button>
 		</View>
 	);
 };

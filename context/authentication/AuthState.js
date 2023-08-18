@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import AuthContext from './authContext';
 import authReducer from './authReducer';
 import { FOREVER_BASE } from '@env';
-import { LOGIN, CONFIRM_SESSION, LOGOUT, SET_LOADING } from '../types';
+import { LOGIN, CONFIRM_SESSION, LOGOUT, SET_LOADING, SIGNUP } from '../types';
 
 const save = async (key, value) => {
 	await SecureStore.setItemAsync(key, value);
@@ -72,10 +72,39 @@ const AuthState = (props) => {
 		}
 	};
 
-	const logout = () => {
+	const logout = async () => {
+		await save('authToken', '');
+
 		dispatch({
 			type: LOGOUT,
 		});
+	};
+
+	// Create new user account & login if successful
+	const signup = async ({ username, email, password, birthday }) => {
+		setLoading();
+
+		const body = {
+			username,
+			email,
+			password,
+			birthday: birthday.toISOString().split('T')[0],
+		};
+
+		const req = await fetch(`${FOREVER_BASE}/v1/auth/signup`, {
+			method: 'POST',
+			body: JSON.stringify(body),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+		const res = await req.json();
+
+		if (res.success) {
+			await login(username, password);
+		} else {
+			console.log(res);
+		}
 	};
 
 	// Set Loading State
@@ -93,6 +122,7 @@ const AuthState = (props) => {
 				logout,
 				confirmSession,
 				setLoading,
+				signup,
 			}}>
 			{props.children}
 		</AuthContext.Provider>

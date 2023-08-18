@@ -1,11 +1,16 @@
-import { ScrollView } from 'react-native';
+import { ScrollView, Pressable } from 'react-native';
+import { useState } from 'react';
 import Memory from './Memory.js';
 
 const MemoryList = ({ memories }) => {
+	const [pressed, setPressed] = useState(false);
+
 	return (
 		<ScrollView>
 			{memories.map((mem) => (
-				<Memory key={mem.id} imageLink={mem.image_link} date={mem.formattedDate} />
+				<Pressable key={mem.id} onPress={() => setPressed(!pressed)}>
+					<Memory imageLink={mem.image_link} date={mem.formattedDate} />
+				</Pressable>
 			))}
 		</ScrollView>
 	);

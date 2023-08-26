@@ -1,4 +1,4 @@
-import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING } from '../types';
+import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
 
 const reducer = (state, action) => {
 	switch (action.type) {
@@ -13,6 +13,7 @@ const reducer = (state, action) => {
 			return {
 				...state,
 				memory: action.payload,
+				memoryVisible: true,
 				loading: false,
 			};
 
@@ -20,6 +21,13 @@ const reducer = (state, action) => {
 			return {
 				...state,
 				loading: true,
+			};
+
+		case CLEAR_MEMORY:
+			return {
+				...state,
+				memory: {},
+				memoryVisible: false,
 			};
 
 		default:

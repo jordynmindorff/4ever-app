@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
 import { FOREVER_BASE } from '@env';
-import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING } from '../types';
+import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
 import * as SecureStore from 'expo-secure-store';
 
 const getValueFor = async (key) => await SecureStore.getItemAsync(key);
@@ -13,6 +13,7 @@ const MemoryState = (props) => {
 		memories: [],
 		memory: {},
 		loading: false,
+		memoryVisible: false,
 	};
 
 	const [state, dispatch] = useReducer(memoryReducer, initialState);
@@ -61,9 +62,23 @@ const MemoryState = (props) => {
 		});
 		const res = await req.json();
 
+		res.data.formattedDate = new Date(res.data.date).toLocaleDateString('en-us', {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+
 		dispatch({
 			type: GET_MEMORY,
 			payload: res.data,
+		});
+	};
+
+	// Get a single memory
+	const clearMemory = async () => {
+		dispatch({
+			type: CLEAR_MEMORY,
 		});
 	};
 
@@ -78,9 +93,11 @@ const MemoryState = (props) => {
 				memories: state.memories,
 				memory: state.memory,
 				loading: state.loading,
+				memoryVisible: state.memoryVisible,
 				getMemories,
 				getMemory,
 				setLoading,
+				clearMemory,
 			}}>
 			{props.children}
 		</MemoryContext.Provider>

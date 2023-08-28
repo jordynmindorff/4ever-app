@@ -3,6 +3,7 @@ export const LOGOUT = 'LOGOUT';
 export const SIGNUP = 'SIGNUP';
 export const GET_MEMORIES = 'GET_MEMORIES';
 export const GET_MEMORY = 'GET_MEMORY';
+export const CLEAR_MEMORY = 'CLEAR_MEMORY';
 export const CREATE_MEMORY = 'CREATE_MEMORY';
 export const SET_LOADING = 'SET_LOADING';
 export const CONFIRM_SESSION = 'CONFIRM_SESSION';

@@ -1,10 +1,11 @@
-import { View, Platform } from 'react-native';
+import 'react-native-url-polyfill/auto';
+import 'react-native-get-random-values';
+import { Platform } from 'react-native';
 import { lightColors, createTheme, ThemeProvider } from '@rneui/themed';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthState from './context/authentication/AuthState.js';
 import MemoryState from './context/memory/MemoryState.js';
-
 import AuthBoundary from './components/AuthBoundary.js';
 
 const theme = createTheme({

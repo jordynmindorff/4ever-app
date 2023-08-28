@@ -1,8 +1,31 @@
-import { Text, View, Modal, Pressable, Image, Dimensions } from 'react-native';
+import { Text, View, Modal, Pressable, Image, Dimensions, Alert } from 'react-native';
 import { makeStyles } from '@rneui/themed';
+import { useContext } from 'react';
+import MemoryContext from '../../context/memory/memoryContext.js';
 
-const MemoryModal = ({ memory, memoryVisible, clearMemory }) => {
+const MemoryModal = () => {
 	const styles = useStyles();
+
+	const memoryContext = useContext(MemoryContext);
+	const { memory, memoryVisible, clearMemory, deleteMemory } = memoryContext;
+
+	const handleDelete = () => {
+		Alert.alert(
+			'Permanent Deletion',
+			'Are you sure you want to permanently delete this memory?',
+			[
+				{
+					text: 'Cancel',
+					style: 'cancel',
+				},
+				{
+					text: 'Yes',
+					onPress: () => deleteMemory(),
+					style: 'destructive',
+				},
+			]
+		);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -18,11 +41,18 @@ const MemoryModal = ({ memory, memoryVisible, clearMemory }) => {
 						<Text style={styles.title}>{memory.formattedDate}</Text>
 						<Text>{memory.body}</Text>
 						<Image style={styles.image} source={{ uri: memory.image_link }} />
-						<Pressable
-							style={[styles.button, styles.buttonClose]}
-							onPress={() => clearMemory()}>
-							<Text style={styles.textStyle}>Close</Text>
-						</Pressable>
+						<View style={styles.buttonGroup}>
+							<Pressable
+								style={[styles.button, styles.buttonClose]}
+								onPress={() => clearMemory()}>
+								<Text style={styles.textStyle}>Close</Text>
+							</Pressable>
+							<Pressable
+								style={[styles.button, styles.buttonDelete]}
+								onPress={() => handleDelete()}>
+								<Text style={styles.textStyle}>Delete Memory</Text>
+							</Pressable>
+						</View>
 					</View>
 				</View>
 			</Modal>
@@ -56,10 +86,19 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: 20,
 		padding: 10,
 		elevation: 2,
+		marginHorizontal: 2,
 	},
 	buttonClose: {
 		marginTop: 10,
+		backgroundColor: theme.colors.primary,
+	},
+	buttonDelete: {
+		marginTop: 10,
 		backgroundColor: theme.colors.error,
+	},
+	buttonGroup: {
+		display: 'flex',
+		flexDirection: 'row',
 	},
 	textStyle: {
 		color: 'white',

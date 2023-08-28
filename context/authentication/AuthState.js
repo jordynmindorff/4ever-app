@@ -2,7 +2,6 @@ import React, { useReducer } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import AuthContext from './authContext';
 import authReducer from './authReducer';
-import { FOREVER_BASE } from '@env';
 import { LOGIN, CONFIRM_SESSION, LOGOUT, SET_LOADING, SIGNUP } from '../types';
 
 const save = async (key, value) => {
@@ -24,7 +23,7 @@ const AuthState = (props) => {
 	const login = async (username, password) => {
 		setLoading();
 
-		const req = await fetch(`${FOREVER_BASE}/v1/auth/login`, {
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/auth/login`, {
 			method: 'POST',
 			body: JSON.stringify({
 				username,
@@ -51,7 +50,7 @@ const AuthState = (props) => {
 	const confirmSession = async (token) => {
 		setLoading();
 
-		const req = await fetch(`${FOREVER_BASE}/v1/auth/confirmsession`, {
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/auth/confirmsession`, {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -91,7 +90,7 @@ const AuthState = (props) => {
 			birthday: birthday.toISOString().split('T')[0],
 		};
 
-		const req = await fetch(`${FOREVER_BASE}/v1/auth/signup`, {
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/auth/signup`, {
 			method: 'POST',
 			body: JSON.stringify(body),
 			headers: {

@@ -1,13 +1,18 @@
 import React, { useReducer } from 'react';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
-import { FOREVER_BASE } from '@env';
-import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
+import {
+	GET_MEMORIES,
+	GET_MEMORY,
+	CREATE_MEMORY,
+	SET_LOADING,
+	CLEAR_MEMORY,
+	DELETE_MEMORY,
+} from '../types';
 import * as SecureStore from 'expo-secure-store';
 
 const getValueFor = async (key) => await SecureStore.getItemAsync(key);
 
-// TODO: DON'T HARDCODE AUTH, IMPLEMENT SEPARATELY NAVIGATED AUTH FLOW WITH TOKEN STORING
 const MemoryState = (props) => {
 	const initialState = {
 		memories: [],
@@ -23,7 +28,7 @@ const MemoryState = (props) => {
 		setLoading();
 		const token = await getValueFor('authToken');
 
-		const req = await fetch(`${FOREVER_BASE}/v1/memory`, {
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory`, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
@@ -50,12 +55,12 @@ const MemoryState = (props) => {
 		});
 	};
 
-	// Get a single memory
+	// Get a single memory, show detail modal by setting memoryVisible to true
 	const getMemory = async (id) => {
 		setLoading();
 		const token = await getValueFor('authToken');
 
-		const req = await fetch(`${FOREVER_BASE}/v1/memory/${id}`, {
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/${id}`, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
@@ -75,6 +80,7 @@ const MemoryState = (props) => {
 		});
 	};
 
+	// create a new memory, add it to the list
 	const createMemory = async (bodyText, imageURL) => {
 		try {
 			setLoading();
@@ -87,7 +93,7 @@ const MemoryState = (props) => {
 				day: 'numeric',
 			});
 
-			const req = await fetch(`${FOREVER_BASE}/v1/memory/`, {
+			const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/`, {
 				method: 'POST',
 				body: JSON.stringify({
 					date,
@@ -118,7 +124,29 @@ const MemoryState = (props) => {
 		}
 	};
 
-	// Get a single memory
+	// Delete a memory, remove it from state, clearing currently visible modal, refetch list of memories
+	const deleteMemory = async () => {
+		setLoading();
+		const token = await getValueFor('authToken');
+
+		if (!state.memory.id) return;
+
+		const memId = state.memory.id;
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/${memId}`, {
+			method: 'DELETE',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		const res = await req.json();
+		if (!res.success) throw new Error(res.msg);
+
+		await clearMemory();
+		await getMemories();
+	};
+
+	// Clear currently visible memory from state and hide modal
 	const clearMemory = async () => {
 		dispatch({
 			type: CLEAR_MEMORY,
@@ -142,6 +170,7 @@ const MemoryState = (props) => {
 				setLoading,
 				clearMemory,
 				createMemory,
+				deleteMemory,
 			}}>
 			{props.children}
 		</MemoryContext.Provider>

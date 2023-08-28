@@ -75,6 +75,49 @@ const MemoryState = (props) => {
 		});
 	};
 
+	const createMemory = async (bodyText, imageURL) => {
+		try {
+			setLoading();
+			const token = await getValueFor('authToken');
+
+			const date = new Date().toLocaleDateString('en-us', {
+				weekday: 'long',
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			});
+
+			const req = await fetch(`${FOREVER_BASE}/v1/memory/`, {
+				method: 'POST',
+				body: JSON.stringify({
+					date,
+					bodyText,
+					imageURL,
+				}),
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+			});
+			const res = await req.json();
+			if (!res.success) throw new Error(res.msg);
+
+			res.data.formattedDate = new Date(res.data.date).toLocaleDateString('en-us', {
+				weekday: 'long',
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			});
+
+			dispatch({
+				payload: res.data,
+				type: CREATE_MEMORY,
+			});
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	// Get a single memory
 	const clearMemory = async () => {
 		dispatch({
@@ -98,6 +141,7 @@ const MemoryState = (props) => {
 				getMemory,
 				setLoading,
 				clearMemory,
+				createMemory,
 			}}>
 			{props.children}
 		</MemoryContext.Provider>

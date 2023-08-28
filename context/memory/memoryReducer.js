@@ -17,6 +17,13 @@ const reducer = (state, action) => {
 				loading: false,
 			};
 
+		case CREATE_MEMORY:
+			return {
+				...state,
+				memories: [...state.memories, action.payload],
+				loading: false,
+			};
+
 		case SET_LOADING:
 			return {
 				...state,

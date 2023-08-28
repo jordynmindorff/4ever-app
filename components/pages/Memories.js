@@ -1,14 +1,22 @@
 import { View, Modal, Pressable, Text, TextInput, Image, Alert } from 'react-native';
 import { useEffect, useContext, useState } from 'react';
-import { Button, Icon, makeStyles, Input } from '@rneui/themed';
+import { Button, Icon, makeStyles } from '@rneui/themed';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import AuthContext from '../../context/authentication/authContext.js';
 import MemoryContext from '../../context/memory/memoryContext.js';
 import MemoryList from '../memories/MemoryList.js';
 import MemoryModal from '../memories/MemoryModal.js';
 import * as ImagePicker from 'expo-image-picker';
 
+import { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION, S3_BUCKET } from '@env';
+
 const Memories = () => {
 	const memoryContext = useContext(MemoryContext);
-	const { getMemories, memories, memory, memoryVisible, clearMemory } = memoryContext;
+	const { getMemories, memories, memory, memoryVisible, clearMemory, createMemory } =
+		memoryContext;
+
+	const authContext = useContext(AuthContext);
+	const { profile } = authContext;
 
 	const [modalVisible, setModalVisible] = useState(false);
 	const [bodyText, setBodyText] = useState('');
@@ -17,6 +25,14 @@ const Memories = () => {
 	const [permissionStatus, requestPermission] = ImagePicker.useCameraPermissions();
 
 	const styles = useStyles();
+
+	const client = new S3Client({
+		credentials: {
+			accessKeyId: AWS_ACCESS_KEY_ID,
+			secretAccessKey: AWS_SECRET_ACCESS_KEY,
+		},
+		region: S3_REGION,
+	});
 
 	const pickImage = async () => {
 		// No permissions request is necessary for launching the image library
@@ -27,10 +43,14 @@ const Memories = () => {
 			quality: 1,
 		});
 
-		console.log(result);
-
 		if (!result.canceled) {
-			setImage(result.assets[0].uri);
+			const { data, Key } = await handleUpload(result.assets[0]);
+
+			const imageURL = `https://4ever.s3.amazonaws.com/${Key}`;
+
+			if (data.$metadata.httpStatusCode === 200 || data.$metadata.httpStatusCode === 201) {
+				createMemory(bodyText, imageURL);
+			}
 		}
 	};
 
@@ -60,6 +80,25 @@ const Memories = () => {
 		} catch (error) {
 			console.log(error);
 		}
+	};
+
+	const handleUpload = async (pickerResult) => {
+		const res = await fetch(pickerResult.uri);
+		const imgBlob = await res.blob();
+
+		const Key = `${profile.id}-${Date.now().toString()}.JPG`;
+
+		const command = new PutObjectCommand({
+			ACL: 'public-read',
+			Bucket: S3_BUCKET,
+			Key,
+			Body: imgBlob,
+			ContentType: 'image/jpeg',
+		});
+
+		const data = await client.send(command);
+
+		return Promise.resolve({ data, Key });
 	};
 
 	useEffect(() => {
@@ -166,6 +205,9 @@ const useStyles = makeStyles((theme) => ({
 	},
 	btnGroup: {
 		margin: 3,
+	},
+	textInput: {
+		marginVertical: 10,
 	},
 }));
 

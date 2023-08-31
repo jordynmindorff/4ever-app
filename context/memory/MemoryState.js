@@ -1,14 +1,7 @@
 import React, { useReducer } from 'react';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
-import {
-	GET_MEMORIES,
-	GET_MEMORY,
-	CREATE_MEMORY,
-	SET_LOADING,
-	CLEAR_MEMORY,
-	DELETE_MEMORY,
-} from '../types';
+import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
 import * as SecureStore from 'expo-secure-store';
 
 const getValueFor = async (key) => await SecureStore.getItemAsync(key);

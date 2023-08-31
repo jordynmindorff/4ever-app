@@ -10,8 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const Memories = () => {
 	const memoryContext = useContext(MemoryContext);
-	const { getMemories, memories, memory, memoryVisible, clearMemory, createMemory } =
-		memoryContext;
+	const { getMemories, memories, createMemory } = memoryContext;
 
 	const authContext = useContext(AuthContext);
 	const { profile } = authContext;
@@ -144,18 +143,30 @@ const Memories = () => {
 								</Button>
 							</View>
 						)}
-						{image && <Image source={{ uri: image.uri }} style={styles.imagePreview} />}
-						<Pressable
-							style={[styles.button, styles.buttonClose]}
-							onPress={() => setModalVisible(!modalVisible)}>
-							<Text style={styles.textStyle}>Cancel</Text>
-						</Pressable>
+						{image && (
+							<View>
+								<Pressable
+									style={styles.buttonDelete}
+									onPress={() => setImage(null)}>
+									<Text style={styles.textStyle}>X</Text>
+								</Pressable>
+								<Image source={{ uri: image.uri }} style={styles.imagePreview} />
+							</View>
+						)}
 
-						<Pressable
-							style={[styles.button, styles.buttonSubmit]}
-							onPress={handleCreation}>
-							<Text style={styles.textStyle}>Create</Text>
-						</Pressable>
+						<View style={styles.btnGroupHoriz}>
+							<Pressable
+								style={[styles.button, styles.buttonClose]}
+								onPress={() => setModalVisible(!modalVisible)}>
+								<Text style={styles.textStyle}>Cancel</Text>
+							</Pressable>
+
+							<Pressable
+								style={[styles.button, styles.buttonSubmit]}
+								onPress={handleCreation}>
+								<Text style={styles.textStyle}>Create</Text>
+							</Pressable>
+						</View>
 					</View>
 				</View>
 			</Modal>
@@ -212,14 +223,28 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: 20,
 		padding: 10,
 		elevation: 2,
+		marginHorizontal: 2,
 	},
 	buttonClose: {
 		marginTop: 10,
 		backgroundColor: theme.colors.error,
 	},
+	buttonDelete: {
+		borderRadius: 50,
+		backgroundColor: theme.colors.error,
+		position: 'absolute',
+		padding: 5,
+		top: 30,
+		right: 5,
+		zIndex: 2,
+	},
 	buttonSubmit: {
 		marginTop: 10,
 		backgroundColor: theme.colors.success,
+	},
+	btnGroupHoriz: {
+		display: 'flex',
+		flexDirection: 'row',
 	},
 	textStyle: {
 		color: 'white',

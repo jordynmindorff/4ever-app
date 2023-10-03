@@ -1,7 +1,14 @@
 import React, { useReducer } from 'react';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
-import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
+import {
+	GET_MEMORIES,
+	GET_MEMORY,
+	CREATE_MEMORY,
+	SET_LOADING,
+	CLEAR_MEMORY,
+	EDIT_MEMORY,
+} from '../types';
 import * as SecureStore from 'expo-secure-store';
 
 const getValueFor = async (key) => await SecureStore.getItemAsync(key);
@@ -139,6 +146,37 @@ const MemoryState = (props) => {
 		await getMemories();
 	};
 
+	// Delete a memory, remove it from state, clearing currently visible modal, refetch list of memories
+	const editMemory = async (newBody, newDate) => {
+		setLoading();
+		const token = await getValueFor('authToken');
+
+		if (!state.memory.id) return;
+
+		const memId = state.memory.id;
+		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/${memId}`, {
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: {
+				date: newDate ? newDate : state.memory.date,
+				bodyText: newBody ? newBody : state.memory.bodyText,
+			},
+		});
+
+		const res = await req.json();
+		if (!res.success) throw new Error(res.msg);
+
+		dispatch({
+			payload: res.data,
+			type: EDIT_MEMORY,
+		});
+
+		await clearMemory();
+		await getMemories();
+	};
+
 	// Clear currently visible memory from state and hide modal
 	const clearMemory = async () => {
 		dispatch({
@@ -164,6 +202,7 @@ const MemoryState = (props) => {
 				clearMemory,
 				createMemory,
 				deleteMemory,
+				editMemory,
 			}}>
 			{props.children}
 		</MemoryContext.Provider>

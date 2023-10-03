@@ -113,8 +113,10 @@ const Memories = () => {
 		getMemories();
 	}, []);
 
+	// TODO: Seperate out creation modal into its own component
 	return (
 		<View>
+			{/* Modal for creating a new memory, not always visible */}
 			<Modal
 				animationType='slide'
 				transparent={true}
@@ -170,8 +172,14 @@ const Memories = () => {
 					</View>
 				</View>
 			</Modal>
+
+			{/* List of memories displayed in order */}
 			<MemoryList memories={memories} />
+
+			{/* Active memory modal if one is selected */}
 			<MemoryModal />
+
+			{/* Floating add button */}
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 				<View style={{ position: 'absolute', bottom: 0 }}>
 					<Button

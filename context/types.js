@@ -7,3 +7,4 @@ export const CLEAR_MEMORY = 'CLEAR_MEMORY';
 export const CREATE_MEMORY = 'CREATE_MEMORY';
 export const SET_LOADING = 'SET_LOADING';
 export const CONFIRM_SESSION = 'CONFIRM_SESSION';
+export const EDIT_BODY = 'EDIT_MEMORY';

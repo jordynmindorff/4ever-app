@@ -1,4 +1,11 @@
-import { GET_MEMORIES, GET_MEMORY, CREATE_MEMORY, SET_LOADING, CLEAR_MEMORY } from '../types';
+import {
+	GET_MEMORIES,
+	GET_MEMORY,
+	CREATE_MEMORY,
+	SET_LOADING,
+	CLEAR_MEMORY,
+	EDIT_MEMORY,
+} from '../types';
 
 const reducer = (state, action) => {
 	switch (action.type) {
@@ -35,6 +42,12 @@ const reducer = (state, action) => {
 				...state,
 				memory: {},
 				memoryVisible: false,
+			};
+
+		case EDIT_MEMORY:
+			return {
+				...state,
+				loading: false,
 			};
 
 		default:

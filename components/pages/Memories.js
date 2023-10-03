@@ -1,4 +1,4 @@
-import { View, Modal, Pressable, Text, TextInput, Image, Alert } from 'react-native';
+import { View, Modal, Pressable, Text, TextInput, Image, Alert, Dimensions } from 'react-native';
 import { useEffect, useContext, useState } from 'react';
 import { Button, Icon, makeStyles } from '@rneui/themed';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -8,12 +8,9 @@ import MemoryList from '../memories/MemoryList.js';
 import MemoryModal from '../memories/MemoryModal.js';
 import * as ImagePicker from 'expo-image-picker';
 
-import { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_REGION, S3_BUCKET } from '@env';
-
 const Memories = () => {
 	const memoryContext = useContext(MemoryContext);
-	const { getMemories, memories, memory, memoryVisible, clearMemory, createMemory } =
-		memoryContext;
+	const { getMemories, memories, createMemory } = memoryContext;
 
 	const authContext = useContext(AuthContext);
 	const { profile } = authContext;
@@ -28,10 +25,10 @@ const Memories = () => {
 
 	const client = new S3Client({
 		credentials: {
-			accessKeyId: AWS_ACCESS_KEY_ID,
-			secretAccessKey: AWS_SECRET_ACCESS_KEY,
+			accessKeyId: process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID,
+			secretAccessKey: process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY,
 		},
-		region: S3_REGION,
+		region: process.env.EXPO_PUBLIC_S3_REGION,
 	});
 
 	const pickImage = async () => {
@@ -44,13 +41,7 @@ const Memories = () => {
 		});
 
 		if (!result.canceled) {
-			const { data, Key } = await handleUpload(result.assets[0]);
-
-			const imageURL = `https://4ever.s3.amazonaws.com/${Key}`;
-
-			if (data.$metadata.httpStatusCode === 200 || data.$metadata.httpStatusCode === 201) {
-				createMemory(bodyText, imageURL);
-			}
+			setImage(result.assets[0]);
 		}
 	};
 
@@ -64,10 +55,8 @@ const Memories = () => {
 					quality: 1,
 				});
 
-				console.log(result);
-
 				if (!result.canceled) {
-					setImage(result.assets[0].uri);
+					setImage(result.assets[0]);
 				}
 			} else {
 				const response = await requestPermission();
@@ -90,7 +79,7 @@ const Memories = () => {
 
 		const command = new PutObjectCommand({
 			ACL: 'public-read',
-			Bucket: S3_BUCKET,
+			Bucket: process.env.EXPO_PUBLIC_S3_BUCKET,
 			Key,
 			Body: imgBlob,
 			ContentType: 'image/jpeg',
@@ -101,12 +90,33 @@ const Memories = () => {
 		return Promise.resolve({ data, Key });
 	};
 
+	const handleCreation = async () => {
+		if (!image || !bodyText) {
+			return Alert.alert('Missing image or body text. Both required.');
+		}
+		const { data, Key } = await handleUpload(image);
+
+		const imageURL = `https://4ever.s3.amazonaws.com/${Key}`;
+
+		if (data.$metadata.httpStatusCode === 200 || data.$metadata.httpStatusCode === 201) {
+			await createMemory(bodyText, imageURL);
+
+			setImage(null);
+			setBodyText('');
+			setModalVisible(false);
+		} else {
+			Alert.alert('Error uploading image.');
+		}
+	};
+
 	useEffect(() => {
 		getMemories();
 	}, []);
 
+	// TODO: Seperate out creation modal into its own component
 	return (
 		<View>
+			{/* Modal for creating a new memory, not always visible */}
 			<Modal
 				animationType='slide'
 				transparent={true}
@@ -122,43 +132,75 @@ const Memories = () => {
 							value={bodyText}
 							onChangeText={setBodyText}
 							style={styles.textInput}
+							blurOnSubmit
+							returnKeyType='done'
 						/>
-						<View>
-							<Button style={styles.btnGroup} onPress={takePhoto}>
-								Access Camera
-							</Button>
-							<Button style={styles.btnGroup} onPress={pickImage}>
-								Upload from Camera Roll
-							</Button>
+						{!image && (
+							<View>
+								<Button style={styles.btnGroup} onPress={takePhoto}>
+									Access Camera
+								</Button>
+								<Button style={styles.btnGroup} onPress={pickImage}>
+									Upload from Camera Roll
+								</Button>
+							</View>
+						)}
+						{image && (
+							<View>
+								<Pressable
+									style={styles.buttonDelete}
+									onPress={() => setImage(null)}>
+									<Text style={styles.textStyle}>X</Text>
+								</Pressable>
+								<Image source={{ uri: image.uri }} style={styles.imagePreview} />
+							</View>
+						)}
+
+						<View style={styles.btnGroupHoriz}>
+							<Pressable
+								style={[styles.button, styles.buttonClose]}
+								onPress={() => setModalVisible(!modalVisible)}>
+								<Text style={styles.textStyle}>Cancel</Text>
+							</Pressable>
+
+							<Pressable
+								style={[styles.button, styles.buttonSubmit]}
+								onPress={handleCreation}>
+								<Text style={styles.textStyle}>Create</Text>
+							</Pressable>
 						</View>
-						<Pressable
-							style={[styles.button, styles.buttonClose]}
-							onPress={() => setModalVisible(!modalVisible)}>
-							<Text style={styles.textStyle}>Cancel</Text>
-						</Pressable>
 					</View>
 				</View>
 			</Modal>
+
+			{/* List of memories displayed in order */}
 			<MemoryList memories={memories} />
-			<MemoryModal memory={memory} memoryVisible={memoryVisible} clearMemory={clearMemory} />
-			{image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-			<Button
-				containerStyle={{
-					flexDirection: 'row',
-					flexWrap: 'wrap',
-					justifyContent: 'center',
-					alignItems: 'center',
-					margin: 20,
-					height: 50,
-				}}
-				buttonStyle={{
-					flex: 1,
-					width: 50,
-					height: 100,
-				}}
-				onPress={() => setModalVisible(!modalVisible)}>
-				<Icon type='ionicons' name='add' color='white' />
-			</Button>
+
+			{/* Active memory modal if one is selected */}
+			<MemoryModal />
+
+			{/* Floating add button */}
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<View style={{ position: 'absolute', bottom: 0 }}>
+					<Button
+						containerStyle={{
+							flexDirection: 'row',
+							flexWrap: 'wrap',
+							justifyContent: 'center',
+							alignItems: 'center',
+							margin: 20,
+							height: 50,
+						}}
+						buttonStyle={{
+							flex: 1,
+							width: 50,
+							height: 100,
+						}}
+						onPress={() => setModalVisible(!modalVisible)}>
+						<Icon type='ionicons' name='add' color='white' />
+					</Button>
+				</View>
+			</View>
 		</View>
 	);
 };
@@ -189,10 +231,28 @@ const useStyles = makeStyles((theme) => ({
 		borderRadius: 20,
 		padding: 10,
 		elevation: 2,
+		marginHorizontal: 2,
 	},
 	buttonClose: {
 		marginTop: 10,
 		backgroundColor: theme.colors.error,
+	},
+	buttonDelete: {
+		borderRadius: 50,
+		backgroundColor: theme.colors.error,
+		position: 'absolute',
+		padding: 5,
+		top: 30,
+		right: 5,
+		zIndex: 2,
+	},
+	buttonSubmit: {
+		marginTop: 10,
+		backgroundColor: theme.colors.success,
+	},
+	btnGroupHoriz: {
+		display: 'flex',
+		flexDirection: 'row',
 	},
 	textStyle: {
 		color: 'white',
@@ -208,6 +268,12 @@ const useStyles = makeStyles((theme) => ({
 	},
 	textInput: {
 		marginVertical: 10,
+	},
+	imagePreview: {
+		width: Dimensions.get('window').width * 0.6,
+		height: 200,
+		marginVertical: 20,
+		resizeMode: 'cover',
 	},
 }));
 

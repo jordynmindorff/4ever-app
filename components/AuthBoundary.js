@@ -1,6 +1,9 @@
 import AuthContext from '../context/authentication/authContext.js';
+import MemoryContext from '../context/memory/memoryContext.js';
 import { useEffect, useContext, Fragment } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import Spinner from 'react-native-loading-spinner-overlay';
+import { View } from 'react-native';
 
 import NavTabs from './layout/NavTabs';
 import AuthStack from './layout/AuthStack.js';
@@ -9,7 +12,10 @@ const getValueFor = async (key) => await SecureStore.getItemAsync(key);
 
 const AuthBoundary = () => {
 	const authContext = useContext(AuthContext);
-	const { confirmSession, isLoggedIn } = authContext;
+	const { confirmSession, isLoggedIn, loading: authLoad } = authContext;
+
+	const memoryContext = useContext(MemoryContext);
+	const { loading: memLoad } = memoryContext;
 
 	useEffect(() => {
 		const check = async () => {
@@ -23,7 +29,13 @@ const AuthBoundary = () => {
 		check();
 	}, []);
 
-	return <Fragment>{isLoggedIn ? <NavTabs /> : <AuthStack />}</Fragment>;
+	return (
+		<Fragment>
+			<Spinner visible={authLoad || memLoad} textContent={'Loading...'} />
+
+			{isLoggedIn ? <NavTabs /> : <AuthStack />}
+		</Fragment>
+	);
 };
 
 export default AuthBoundary;

@@ -181,7 +181,7 @@ const Memories = () => {
 
 			{/* Floating add button */}
 			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<View style={{ position: 'absolute', bottom: 0 }}>
+				<View style={{}}>
 					<Button
 						containerStyle={{
 							flexDirection: 'row',

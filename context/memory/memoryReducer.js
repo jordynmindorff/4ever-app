@@ -34,7 +34,7 @@ const reducer = (state, action) => {
 		case SET_LOADING:
 			return {
 				...state,
-				loading: true,
+				loading: !state.loading,
 			};
 
 		case CLEAR_MEMORY:

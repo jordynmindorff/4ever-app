@@ -10,7 +10,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const Memories = () => {
 	const memoryContext = useContext(MemoryContext);
-	const { getMemories, memories, createMemory } = memoryContext;
+	const { getMemories, memories, createMemory, setLoading } = memoryContext;
 
 	const authContext = useContext(AuthContext);
 	const { profile } = authContext;
@@ -94,6 +94,8 @@ const Memories = () => {
 		if (!image || !bodyText) {
 			return Alert.alert('Missing image or body text. Both required.');
 		}
+
+		setLoading();
 		const { data, Key } = await handleUpload(image);
 
 		const imageURL = `https://4ever.s3.amazonaws.com/${Key}`;
@@ -104,8 +106,10 @@ const Memories = () => {
 			setImage(null);
 			setBodyText('');
 			setModalVisible(false);
+			setLoading();
 		} else {
-			Alert.alert('Error uploading image.');
+			setLoading();
+			Alert.alert('Error Uploading Image');
 		}
 	};
 
@@ -113,7 +117,6 @@ const Memories = () => {
 		getMemories();
 	}, []);
 
-	// TODO: Seperate out creation modal into its own component
 	return (
 		<View>
 			{/* Modal for creating a new memory, not always visible */}
@@ -179,28 +182,54 @@ const Memories = () => {
 			{/* Active memory modal if one is selected */}
 			<MemoryModal />
 
-			{/* Floating add button */}
-			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<View style={{}}>
-					<Button
-						containerStyle={{
-							flexDirection: 'row',
-							flexWrap: 'wrap',
-							justifyContent: 'center',
-							alignItems: 'center',
-							margin: 20,
-							height: 50,
-						}}
-						buttonStyle={{
-							flex: 1,
-							width: 50,
-							height: 100,
-						}}
-						onPress={() => setModalVisible(!modalVisible)}>
-						<Icon type='ionicons' name='add' color='white' />
-					</Button>
+			{/* Floating add button - Need seperate cases for styling issue */}
+			{memories[0] && (
+				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+					<View style={{ position: 'absolute', bottom: 0 }}>
+						<Button
+							containerStyle={{
+								flexDirection: 'row',
+								flexWrap: 'wrap',
+								justifyContent: 'center',
+								alignItems: 'center',
+								margin: 20,
+								height: 50,
+							}}
+							buttonStyle={{
+								flex: 1,
+								width: 50,
+								height: 100,
+							}}
+							onPress={() => setModalVisible(!modalVisible)}>
+							<Icon type='ionicons' name='add' color='white' />
+						</Button>
+					</View>
 				</View>
-			</View>
+			)}
+
+			{!memories[0] && (
+				<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+					<View style={{ height: '100%', position: 'absolute', bottom: 0 }}>
+						<Button
+							containerStyle={{
+								flexDirection: 'row',
+								flexWrap: 'wrap',
+								justifyContent: 'center',
+								alignItems: 'center',
+								margin: 20,
+								height: 50,
+							}}
+							buttonStyle={{
+								flex: 1,
+								width: 50,
+								height: 100,
+							}}
+							onPress={() => setModalVisible(!modalVisible)}>
+							<Icon type='ionicons' name='add' color='white' />
+						</Button>
+					</View>
+				</View>
+			)}
 		</View>
 	);
 };

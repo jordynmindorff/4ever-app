@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { Alert } from 'react-native';
 import MemoryContext from './memoryContext';
 import memoryReducer from './memoryReducer';
 import {
@@ -120,6 +121,8 @@ const MemoryState = (props) => {
 				type: CREATE_MEMORY,
 			});
 		} catch (err) {
+			setLoading();
+			Alert.alert('Creation Failed');
 			console.log(err);
 		}
 	};
@@ -148,30 +151,35 @@ const MemoryState = (props) => {
 
 	// Delete a memory, remove it from state, clearing currently visible modal, refetch list of memories
 	const editMemory = async (newBody, newDate) => {
-		setLoading();
-		const token = await getValueFor('authToken');
+		try {
+			setLoading();
+			const token = await getValueFor('authToken');
 
-		if (!state.memory.id) return;
+			if (!state.memory.id) return;
 
-		const memId = state.memory.id;
-		const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/${memId}`, {
-			method: 'PATCH',
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-			body: {
-				date: newDate ? newDate : state.memory.date,
-				bodyText: newBody ? newBody : state.memory.bodyText,
-			},
-		});
+			const memId = state.memory.id;
+			const req = await fetch(`${process.env.EXPO_PUBLIC_FOREVER_BASE}/v1/memory/${memId}`, {
+				method: 'PATCH',
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+				body: {
+					date: newDate ? newDate : state.memory.date,
+					bodyText: newBody ? newBody : state.memory.bodyText,
+				},
+			});
 
-		const res = await req.json();
-		if (!res.success) throw new Error(res.msg);
+			const res = await req.json();
+			if (!res.success) throw new Error(res.msg);
 
-		dispatch({
-			payload: res.data,
-			type: EDIT_MEMORY,
-		});
+			dispatch({
+				payload: res.data,
+				type: EDIT_MEMORY,
+			});
+		} catch (error) {
+			setLoading();
+			Alert.alert('Edit Failed');
+		}
 
 		await clearMemory();
 		await getMemories();

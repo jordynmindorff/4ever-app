@@ -1,4 +1,5 @@
 import React, { useReducer } from 'react';
+import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import AuthContext from './authContext';
 import authReducer from './authReducer';
@@ -18,7 +19,6 @@ const AuthState = (props) => {
 
 	const [state, dispatch] = useReducer(authReducer, initialState);
 
-	// TODO: email accept
 	// Login and return token
 	const login = async (username, password) => {
 		setLoading();
@@ -43,7 +43,8 @@ const AuthState = (props) => {
 
 			await save('authToken', res.data.token);
 		} else {
-			// TODO handle with alert
+			setLoading();
+			Alert.alert('Login Failed');
 		}
 	};
 
@@ -102,6 +103,8 @@ const AuthState = (props) => {
 		if (res.success) {
 			await login(username, password);
 		} else {
+			setLoading();
+			Alert.alert('Signup Failed');
 			console.log(res);
 		}
 	};

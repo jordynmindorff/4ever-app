@@ -3,7 +3,6 @@ import MemoryContext from '../context/memory/memoryContext.js';
 import { useEffect, useContext, Fragment } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import Spinner from 'react-native-loading-spinner-overlay';
-import { View } from 'react-native';
 
 import NavTabs from './layout/NavTabs';
 import AuthStack from './layout/AuthStack.js';

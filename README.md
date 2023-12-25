@@ -18,6 +18,6 @@ _The accompanying backend can be found [here](https://github.com/jordynmindorff/
 
 <style>
 img {
-    height: 400px
+    height: 400px;
 }
 </style>

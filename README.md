@@ -2,11 +2,11 @@
 
 ## Photos - iOS Testing
 
-![Entry](./assets/IMG_5358.PNG)
-![Signup](./assets/IMG_5359.PNG)
-![Add](./assets/IMG_5360.PNG)
-![View Memory](./assets/IMG_5361.PNG)
-![Home Screen](./assets/IMG_5362.PNG)
+![Entry](./assets/IMG_5358.PNG){: style="height:300px"}
+![Signup](./assets/IMG_5359.PNG){: style="height:300px"}
+![Add](./assets/IMG_5360.PNG){: style="height:300px"}
+![View Memory](./assets/IMG_5361.PNG){: style="height:300px"}
+![Home Screen](./assets/IMG_5362.PNG){: style="height:300px"}
 
 ## Description
 
